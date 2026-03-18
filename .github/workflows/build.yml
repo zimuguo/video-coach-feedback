@@ -1,0 +1,54 @@
+name: Build Installers
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  build-mac:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Build Coach App (Mac)
+        working-directory: coach-app
+        run: npm install && npm run build && npx electron-builder --mac dmg
+
+      - name: Build Teacher App (Mac)
+        working-directory: teacher-app
+        run: npm install && npm run build && npx electron-builder --mac dmg
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mac-installers
+          path: |
+            coach-app/dist-installers/*.dmg
+            teacher-app/dist-installers/*.dmg
+
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Build Coach App (Windows)
+        working-directory: coach-app
+        run: npm install && npm run build && npx electron-builder --win nsis --x64
+
+      - name: Build Teacher App (Windows)
+        working-directory: teacher-app
+        run: npm install && npm run build && npx electron-builder --win nsis --x64
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-installers
+          path: |
+            coach-app/dist-installers/*.exe
+            teacher-app/dist-installers/*.exe
