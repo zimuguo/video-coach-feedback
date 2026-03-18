@@ -1,0 +1,24 @@
+appId: com.videocoaching.coach
+productName: Video Coaching Feedback - Coach
+directories:
+  output: dist-installers
+files:
+  - out/**/*
+  - "!**/.vscode/**"
+  - "!src/**"
+win:
+  target:
+    - target: nsis
+      arch: [x64]
+  icon: resources/icon.ico
+mac:
+  target:
+    - target: dmg
+      arch: [x64, arm64]
+  icon: resources/icon.icns
+  category: public.app-category.education
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  installerIcon: resources/icon.ico
+  uninstallerIcon: resources/icon.ico

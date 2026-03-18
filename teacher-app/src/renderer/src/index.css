@@ -1,0 +1,100 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: #0f172a;
+  color: #f1f5f9;
+  overflow: hidden;
+}
+
+video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.seek-bar-container {
+  position: relative;
+  height: 28px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.seek-bar-track {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 6px;
+  background: #334155;
+  border-radius: 3px;
+}
+
+.seek-bar-fill {
+  height: 100%;
+  background: #10b981;
+  border-radius: 3px;
+  transition: width 0.1s linear;
+}
+
+.seek-bar-thumb {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  background: white;
+  border-radius: 50%;
+  transform: translateX(-50%);
+  top: 50%;
+  margin-top: -7px;
+  pointer-events: none;
+}
+
+.timestamp-marker {
+  position: absolute;
+  width: 3px;
+  height: 16px;
+  background: #f59e0b;
+  border-radius: 2px;
+  transform: translateX(-50%);
+  top: 50%;
+  margin-top: -8px;
+  cursor: pointer;
+  transition: transform 0.1s, background 0.1s;
+  z-index: 10;
+}
+
+.timestamp-marker:hover {
+  transform: translateX(-50%) scaleY(1.3);
+  background: #fbbf24;
+}
+
+.timestamp-marker.active {
+  background: #ef4444;
+  transform: translateX(-50%) scaleY(1.4);
+}
+
+.timestamp-marker-tooltip {
+  position: absolute;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1e293b;
+  border: 1px solid #475569;
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 12px;
+  white-space: nowrap;
+  max-width: 200px;
+  white-space: normal;
+  pointer-events: none;
+  z-index: 20;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}

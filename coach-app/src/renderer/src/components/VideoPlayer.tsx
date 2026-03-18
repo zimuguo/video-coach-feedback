@@ -1,0 +1,170 @@
+import React, { useRef, useEffect, useCallback } from 'react'
+import { useAppStore } from '../store/useAppStore'
+
+function formatTime(seconds: number): string {
+  if (!isFinite(seconds)) return '0:00'
+  const m = Math.floor(seconds / 60)
+  const s = Math.floor(seconds % 60)
+  return `${m}:${s.toString().padStart(2, '0')}`
+}
+
+export default function VideoPlayer() {
+  const videoRef = useRef<HTMLVideoElement>(null)
+  const seekBarRef = useRef<HTMLDivElement>(null)
+  const { videoUrl, currentTime, videoDuration, setCurrentTime, setVideoDuration, openCommentForm } =
+    useAppStore()
+
+  const [isPlaying, setIsPlaying] = React.useState(false)
+  const [volume, setVolume] = React.useState(1)
+
+  useEffect(() => {
+    const video = videoRef.current
+    if (!video || !videoUrl) return
+    video.src = videoUrl
+    video.load()
+    setIsPlaying(false)
+  }, [videoUrl])
+
+  const handleTimeUpdate = useCallback(() => {
+    const video = videoRef.current
+    if (!video) return
+    setCurrentTime(video.currentTime)
+  }, [setCurrentTime])
+
+  const handleLoadedMetadata = useCallback(() => {
+    const video = videoRef.current
+    if (!video) return
+    setVideoDuration(video.duration)
+  }, [setVideoDuration])
+
+  const handlePlayPause = () => {
+    const video = videoRef.current
+    if (!video) return
+    if (video.paused) {
+      video.play()
+      setIsPlaying(true)
+    } else {
+      video.pause()
+      setIsPlaying(false)
+    }
+  }
+
+  const handleSeekBarClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    const video = videoRef.current
+    const bar = seekBarRef.current
+    if (!video || !bar || videoDuration === 0) return
+    const rect = bar.getBoundingClientRect()
+    const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width))
+    video.currentTime = ratio * videoDuration
+  }
+
+  const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const v = parseFloat(e.target.value)
+    setVolume(v)
+    if (videoRef.current) videoRef.current.volume = v
+  }
+
+  const handleAddComment = () => {
+    const video = videoRef.current
+    if (video) video.pause()
+    setIsPlaying(false)
+    openCommentForm(currentTime)
+  }
+
+  const progressPercent = videoDuration > 0 ? (currentTime / videoDuration) * 100 : 0
+
+  return (
+    <div className="flex flex-col h-full bg-black">
+      {/* Video */}
+      <div className="flex-1 relative flex items-center justify-center overflow-hidden min-h-0">
+        <video
+          ref={videoRef}
+          onTimeUpdate={handleTimeUpdate}
+          onLoadedMetadata={handleLoadedMetadata}
+          onPlay={() => setIsPlaying(true)}
+          onPause={() => setIsPlaying(false)}
+          onEnded={() => setIsPlaying(false)}
+          className="max-w-full max-h-full"
+          playsInline
+        />
+      </div>
+
+      {/* Controls */}
+      <div className="bg-slate-900 px-4 py-3 shrink-0">
+        {/* Seek bar */}
+        <div ref={seekBarRef} className="seek-bar-container mb-2" onClick={handleSeekBarClick}>
+          <div className="seek-bar-track">
+            <div className="seek-bar-fill" style={{ width: `${progressPercent}%` }} />
+          </div>
+          <div className="seek-bar-thumb" style={{ left: `${progressPercent}%` }} />
+        </div>
+
+        {/* Button row */}
+        <div className="flex items-center gap-3">
+          {/* Play/Pause */}
+          <button
+            onClick={handlePlayPause}
+            className="w-10 h-10 flex items-center justify-center bg-blue-600 hover:bg-blue-700 rounded-full text-white transition-colors shrink-0"
+            title={isPlaying ? 'Pause' : 'Play'}
+          >
+            {isPlaying ? (
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                <rect x="6" y="4" width="4" height="16" rx="1" />
+                <rect x="14" y="4" width="4" height="16" rx="1" />
+              </svg>
+            ) : (
+              <svg className="w-5 h-5 ml-0.5" fill="currentColor" viewBox="0 0 24 24">
+                <polygon points="5,3 19,12 5,21" />
+              </svg>
+            )}
+          </button>
+
+          {/* Time display */}
+          <span className="text-sm font-mono text-slate-300 shrink-0">
+            {formatTime(currentTime)} / {formatTime(videoDuration)}
+          </span>
+
+          {/* Volume */}
+          <div className="flex items-center gap-2 ml-2">
+            <svg
+              className="w-4 h-4 text-slate-400 shrink-0"
+              fill="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3A4.5 4.5 0 0 0 14 7.97v8.05c1.48-.73 2.5-2.25 2.5-4.02z" />
+            </svg>
+            <input
+              type="range"
+              min="0"
+              max="1"
+              step="0.05"
+              value={volume}
+              onChange={handleVolumeChange}
+              className="w-20 accent-blue-500"
+            />
+          </div>
+
+          <div className="flex-1" />
+
+          {/* Add Comment button */}
+          <button
+            onClick={handleAddComment}
+            className="bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
+            title="Pause video and add a comment at the current timestamp"
+          >
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              strokeWidth={2}
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
+            Add Comment at {formatTime(currentTime)}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
