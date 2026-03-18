@@ -71,11 +71,7 @@ npm run package
 
 Installers are written to `dist-installers/`.
 
-On **Mac**, this produces a `.dmg`. On **Windows**, this produces an NSIS installer `.exe`. Building a Windows installer from Mac requires wine; without it, use `--win portable` instead:
-
-```bash
-npx electron-builder --win portable --x64
-```
+On **Mac**, this produces a `.dmg`. On **Windows**, this produces a portable `.exe` (no installation wizard — users double-click to run).
 
 ### Build installers via GitHub Actions (recommended for releases)
 
