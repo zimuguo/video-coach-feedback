@@ -57,7 +57,7 @@ npm install
 npm run dev
 ```
 
-### Build installers
+### Build installers locally
 
 ```bash
 # Coach app
@@ -70,6 +70,31 @@ npm run package
 ```
 
 Installers are written to `dist-installers/`.
+
+On **Mac**, this produces a `.dmg`. On **Windows**, this produces an NSIS installer `.exe`. Building a Windows installer from Mac requires wine; without it, use `--win portable` instead:
+
+```bash
+npx electron-builder --win portable --x64
+```
+
+### Build installers via GitHub Actions (recommended for releases)
+
+The workflow at `.github/workflows/build.yml` builds proper Mac DMG and Windows NSIS installer for both apps on real OS runners — no wine or cross-compilation needed.
+
+**Trigger a build:**
+
+Option 1 — push a version tag:
+```bash
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+Option 2 — run manually from GitHub:
+> Repository → **Actions** tab → **Build Installers** → **Run workflow**
+
+**Download the results:**
+
+After the workflow completes, go to the Actions run page and download the `mac-installers` or `windows-installers` artifact ZIP. Each contains the `.dmg` / `.exe` files for both apps.
 
 ## Tech Stack
 
