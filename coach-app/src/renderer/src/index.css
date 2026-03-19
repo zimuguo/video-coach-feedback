@@ -65,3 +65,44 @@ video {
 textarea {
   resize: vertical;
 }
+
+.timestamp-marker {
+  position: absolute;
+  width: 3px;
+  height: 16px;
+  background: #f59e0b;
+  border-radius: 2px;
+  transform: translateX(-50%);
+  top: 50%;
+  margin-top: -8px;
+  cursor: pointer;
+  transition: transform 0.1s, background 0.1s;
+  z-index: 10;
+}
+
+.timestamp-marker:hover {
+  transform: translateX(-50%) scaleY(1.3);
+  background: #fbbf24;
+}
+
+.timestamp-marker.active {
+  background: #ef4444;
+  transform: translateX(-50%) scaleY(1.4);
+}
+
+.timestamp-marker-tooltip {
+  position: absolute;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1e293b;
+  border: 1px solid #475569;
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 12px;
+  white-space: normal;
+  max-width: 200px;
+  pointer-events: none;
+  z-index: 20;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}

@@ -11,12 +11,16 @@ function formatTime(seconds: number): string {
 export default function VideoPlayer() {
   const videoRef = useRef<HTMLVideoElement>(null)
   const seekBarRef = useRef<HTMLDivElement>(null)
-  const { videoUrl, currentTime, videoDuration, comments, setCurrentTime, setVideoDuration, openCommentForm } =
-    useAppStore()
+  const {
+    videoUrl, currentTime, videoDuration, comments,
+    selectedCommentId, setCurrentTime, setVideoDuration,
+    selectComment, openCommentForm
+  } = useAppStore()
 
   const isDragging = useRef(false)
   const [isPlaying, setIsPlaying] = useState(false)
   const [volume, setVolume] = useState(1)
+  const [hoveredMarkerId, setHoveredMarkerId] = useState<string | null>(null)
 
   useEffect(() => {
     const video = videoRef.current
@@ -148,8 +152,59 @@ export default function VideoPlayer() {
           <div className="seek-bar-track">
             <div className="seek-bar-fill" style={{ width: `${progressPercent}%` }} />
           </div>
+
+          {/* Comment markers */}
+          {videoDuration > 0 &&
+            comments.map((comment) => {
+              const leftPercent = (comment.timestamp / videoDuration) * 100
+              const isActive = comment.id === selectedCommentId
+              const isHovered = comment.id === hoveredMarkerId
+              return (
+                <div
+                  key={comment.id}
+                  className={`timestamp-marker ${isActive ? 'active' : ''}`}
+                  style={{ left: `${leftPercent}%` }}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    const video = videoRef.current
+                    if (video) video.currentTime = comment.timestamp
+                    selectComment(comment.id)
+                  }}
+                  onMouseEnter={() => setHoveredMarkerId(comment.id)}
+                  onMouseLeave={() => setHoveredMarkerId(null)}
+                  title={`${comment.timestampDisplay}: ${comment.text}`}
+                >
+                  {(isHovered || isActive) && (
+                    <div className="timestamp-marker-tooltip">
+                      <div className="text-amber-400 text-xs font-mono mb-1">
+                        {comment.timestampDisplay}
+                      </div>
+                      <div
+                        className="text-slate-200 text-xs leading-snug"
+                        style={{ maxWidth: '180px', wordBreak: 'break-word' }}
+                      >
+                        {comment.text.length > 80
+                          ? comment.text.slice(0, 80) + '...'
+                          : comment.text}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )
+            })}
+
           <div className="seek-bar-thumb" style={{ left: `${progressPercent}%` }} />
         </div>
+
+        {/* Legend */}
+        {comments.length > 0 && (
+          <div className="flex items-center gap-1.5 text-xs text-slate-500 mb-2">
+            <div className="w-2 h-3 bg-amber-500 rounded-sm"></div>
+            <span>
+              {comments.length} comment{comments.length !== 1 ? 's' : ''} — click a marker to jump to that moment
+            </span>
+          </div>
+        )}
 
         {/* Button row */}
         <div className="flex items-center gap-3">
