@@ -83,14 +83,41 @@ export default function VideoPlayer() {
     }
   }
 
-  const handleSeekBarClick = (e: React.MouseEvent<HTMLDivElement>) => {
+  const isDragging = useRef(false)
+
+  const seekToClientX = useCallback((clientX: number) => {
     const video = videoRef.current
     const bar = seekBarRef.current
-    if (!video || !bar || videoDuration === 0) return
+    if (!video || !bar) return
+    const duration = video.duration
+    if (!isFinite(duration) || duration === 0) return
     const rect = bar.getBoundingClientRect()
-    const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width))
-    video.currentTime = ratio * videoDuration
+    const ratio = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width))
+    video.currentTime = ratio * duration
+  }, [])
+
+  const handleSeekMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    e.preventDefault()
+    isDragging.current = true
+    seekToClientX(e.clientX)
   }
+
+  useEffect(() => {
+    const onMouseMove = (e: MouseEvent) => {
+      if (!isDragging.current) return
+      e.preventDefault()
+      seekToClientX(e.clientX)
+    }
+    const onMouseUp = () => {
+      isDragging.current = false
+    }
+    document.addEventListener('mousemove', onMouseMove)
+    document.addEventListener('mouseup', onMouseUp)
+    return () => {
+      document.removeEventListener('mousemove', onMouseMove)
+      document.removeEventListener('mouseup', onMouseUp)
+    }
+  }, [])
 
   const handleMarkerClick = (
     e: React.MouseEvent,
@@ -133,7 +160,7 @@ export default function VideoPlayer() {
         <div
           ref={seekBarRef}
           className="seek-bar-container mb-2"
-          onClick={handleSeekBarClick}
+          onMouseDown={handleSeekMouseDown}
         >
           <div className="seek-bar-track">
             <div className="seek-bar-fill" style={{ width: `${progressPercent}%` }} />

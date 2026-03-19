@@ -42,7 +42,6 @@ video {
   height: 100%;
   background: #10b981;
   border-radius: 3px;
-  transition: width 0.1s linear;
 }
 
 .seek-bar-thumb {

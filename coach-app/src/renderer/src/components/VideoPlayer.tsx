@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useCallback } from 'react'
+import React, { useRef, useEffect, useCallback, useState } from 'react'
 import { useAppStore } from '../store/useAppStore'
 
 function formatTime(seconds: number): string {
@@ -14,8 +14,9 @@ export default function VideoPlayer() {
   const { videoUrl, currentTime, videoDuration, setCurrentTime, setVideoDuration, openCommentForm } =
     useAppStore()
 
-  const [isPlaying, setIsPlaying] = React.useState(false)
-  const [volume, setVolume] = React.useState(1)
+  const isDragging = useRef(false)
+  const [isPlaying, setIsPlaying] = useState(false)
+  const [volume, setVolume] = useState(1)
 
   useEffect(() => {
     const video = videoRef.current
@@ -49,14 +50,39 @@ export default function VideoPlayer() {
     }
   }
 
-  const handleSeekBarClick = (e: React.MouseEvent<HTMLDivElement>) => {
+  const seekToClientX = useCallback((clientX: number) => {
     const video = videoRef.current
     const bar = seekBarRef.current
-    if (!video || !bar || videoDuration === 0) return
+    if (!video || !bar) return
+    const duration = video.duration
+    if (!isFinite(duration) || duration === 0) return
     const rect = bar.getBoundingClientRect()
-    const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width))
-    video.currentTime = ratio * videoDuration
+    const ratio = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width))
+    video.currentTime = ratio * duration
+  }, [])
+
+  const handleSeekMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    e.preventDefault()
+    isDragging.current = true
+    seekToClientX(e.clientX)
   }
+
+  useEffect(() => {
+    const onMouseMove = (e: MouseEvent) => {
+      if (!isDragging.current) return
+      e.preventDefault()
+      seekToClientX(e.clientX)
+    }
+    const onMouseUp = () => {
+      isDragging.current = false
+    }
+    document.addEventListener('mousemove', onMouseMove)
+    document.addEventListener('mouseup', onMouseUp)
+    return () => {
+      document.removeEventListener('mousemove', onMouseMove)
+      document.removeEventListener('mouseup', onMouseUp)
+    }
+  }, [])
 
   const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const v = parseFloat(e.target.value)
@@ -92,7 +118,7 @@ export default function VideoPlayer() {
       {/* Controls */}
       <div className="bg-slate-900 px-4 py-3 shrink-0">
         {/* Seek bar */}
-        <div ref={seekBarRef} className="seek-bar-container mb-2" onClick={handleSeekBarClick}>
+        <div ref={seekBarRef} className="seek-bar-container mb-2" onMouseDown={handleSeekMouseDown}>
           <div className="seek-bar-track">
             <div className="seek-bar-fill" style={{ width: `${progressPercent}%` }} />
           </div>
