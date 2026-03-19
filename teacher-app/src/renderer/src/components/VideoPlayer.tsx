@@ -119,6 +119,32 @@ export default function VideoPlayer() {
     }
   }, [])
 
+  const handleStepBack = () => {
+    const video = videoRef.current
+    if (!video) return
+    const prev = comments
+      .filter((c) => c.timestamp < currentTime - 0.1)
+      .sort((a, b) => b.timestamp - a.timestamp)[0]
+    if (prev) {
+      video.currentTime = prev.timestamp
+      video.pause()
+      setIsPlaying(false)
+    }
+  }
+
+  const handleStepForward = () => {
+    const video = videoRef.current
+    if (!video) return
+    const next = comments
+      .filter((c) => c.timestamp > currentTime + 0.1)
+      .sort((a, b) => a.timestamp - b.timestamp)[0]
+    if (next) {
+      video.currentTime = next.timestamp
+      video.pause()
+      setIsPlaying(false)
+    }
+  }
+
   const handleMarkerClick = (
     e: React.MouseEvent,
     commentId: string,
@@ -217,6 +243,18 @@ export default function VideoPlayer() {
 
         {/* Button row */}
         <div className="flex items-center gap-3">
+          {/* Step back */}
+          <button
+            onClick={handleStepBack}
+            disabled={comments.filter((c) => c.timestamp < currentTime - 0.1).length === 0}
+            className="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-slate-100 disabled:opacity-30 transition-colors shrink-0"
+            title="Previous comment"
+          >
+            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M6 6h2v12H6zm3.5 6 8.5 6V6z" />
+            </svg>
+          </button>
+
           <button
             onClick={handlePlayPause}
             className="w-10 h-10 flex items-center justify-center bg-emerald-600 hover:bg-emerald-700 rounded-full text-white transition-colors shrink-0"
@@ -231,6 +269,18 @@ export default function VideoPlayer() {
                 <polygon points="5,3 19,12 5,21" />
               </svg>
             )}
+          </button>
+
+          {/* Step forward */}
+          <button
+            onClick={handleStepForward}
+            disabled={comments.filter((c) => c.timestamp > currentTime + 0.1).length === 0}
+            className="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-slate-100 disabled:opacity-30 transition-colors shrink-0"
+            title="Next comment"
+          >
+            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M6 18 14.5 12 6 6v12zm2.5-6 8.5 6V6l-8.5 6zM16 6h2v12h-2z" />
+            </svg>
           </button>
 
           <span className="text-sm font-mono text-slate-300 shrink-0">
