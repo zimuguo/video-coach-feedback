@@ -50,7 +50,7 @@ Your coach will send you a `.zip` file containing:
 2. Enter your name and the teacher's name in the header fields
 3. Click **"Load Video"** to select your recording
 4. Watch the video — press **"Add Comment"** at any moment to pause and leave timestamped feedback
-5. Switch to the **Summary Table** tab to fill in the five structured feedback categories
+5. Switch to the **Statistics** tab to enter label names and counts for the two bar charts
 6. Click **"Export Package"** to create a ZIP file to send to the teacher
 
 ---

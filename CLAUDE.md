@@ -47,7 +47,9 @@ In the coach app, IPC handlers are extracted to `src/main/ipc-handlers.ts`. In t
 
 ### `localfile://` custom protocol
 
-Local video files cannot be loaded directly via `file://` in the sandboxed renderer. Both apps register a `localfile://` scheme (in `main/index.ts`, before `app.whenReady`) that proxies requests through `net.fetch` + `pathToFileURL`. The renderer receives a `localfile:///absolute/path/to/video.mp4` URL as the `<video src>`.
+Local video files cannot be loaded directly via `file://` in the sandboxed renderer. Both apps register a `localfile://` scheme (in `main/index.ts`, before `app.whenReady`) that serves video files with proper **HTTP range request support** so the `<video>` element can seek. The renderer receives a `localfile:///absolute/path/to/video.mp4` URL as the `<video src>`.
+
+The handler manually reads the `Range` request header, slices the file with `createReadStream({ start, end })`, and returns a `206 Partial Content` response with correct `Content-Range` and `Accept-Ranges: bytes` headers. Without this, seeking resets the video to 0:00.
 
 The scheme registration (`protocol.registerSchemesAsPrivileged`) **must happen synchronously before `app.whenReady()`**, not inside the callback.
 
@@ -64,14 +66,17 @@ JSON files are derived from the video filename and stored as siblings:
 
 This derivation happens in the main process (`file:getJsonPaths` IPC handler). The teacher app uses the same handler to locate the files automatically after the teacher selects the video.
 
-### Adding or renaming summary categories
+### Statistics / bar chart data
 
-The five structured feedback fields are defined in one place: `src/renderer/src/types/index.ts` — the `SummaryData` interface and the `SUMMARY_LABELS` constant. Both apps have their own copy of this file with identical content. Changing categories requires updating both copies, and the `EMPTY_SUMMARY` constant in the same file.
+`SummaryData` holds two bar chart datasets: `barChart1` (5 bars) and `barChart2` (4 bars). Each bar is a `BarItem { label: string; count: number }`. Both apps have their own copy of `src/renderer/src/types/index.ts` with identical content — changes must be applied to both. `EMPTY_SUMMARY` initialises both arrays with blank labels and zero counts.
+
+In the coach app, `updateBarItem(chart, index, field, value)` in the store updates individual bars; the summary is auto-saved on each input blur.
 
 ### Coach vs. Teacher differences
 
 The apps share the same overall structure but differ in:
-- **Coach** has `ipc-handlers.ts` (write operations, ZIP export via `archiver`), `CommentPanel` with edit/delete/add form, and `ExportButton`
-- **Teacher** has all IPC inline in `main/index.ts` (read-only), `VideoPlayer` with amber timestamp marker pips rendered over the custom seek bar, and `CommentPanel` that seeks on click
+- **Coach** has `ipc-handlers.ts` (write operations, ZIP export via `archiver`), `CommentPanel` with edit/delete/add form, `ExportButton`, and editable bar chart inputs in the Statistics tab
+- **Teacher** has all IPC inline in `main/index.ts` (read-only), `CommentPanel` that seeks on click, and read-only bar chart display in the Statistics tab
+- Both apps have amber timestamp marker pips on the seek bar and **step back / step forward** buttons flanking the play button to jump between comment markers
 - Teacher's `VideoPlayer` manages a `seekToTime` value in the store — when set, the video element seeks then clears it; this decouples the comment list's seek trigger from the video element ref
 - Color scheme: coach = blue, teacher = emerald/green

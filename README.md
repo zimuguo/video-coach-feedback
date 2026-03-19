@@ -16,23 +16,25 @@ video-commenter/
 
 The coach loads a video, watches it, and:
 - Pauses at any moment and clicks **Add Comment** to leave timestamped feedback
-- Fills in the **Summary Table** with structured written feedback across 5 categories
+- Uses the **step back / step forward** buttons to navigate between comment markers
+- Fills in the **Statistics** tab with two bar charts (5-category and 4-category) to record observation counts
 - Clicks **Export Package** to create a ZIP file containing the video + JSON files
 
 ### Teacher App (`teacher-app/`)
 
 The teacher extracts the ZIP, then:
-- Loads the video file — comments and summary load automatically from sibling JSON files
+- Loads the video file — comments and statistics load automatically from sibling JSON files
 - Sees amber marker pips on the seek bar at every comment timestamp
 - Clicks a pip (or a comment in the list) to jump directly to that moment in the video
-- Reads the full summary table on the Summary tab
+- Uses the **step back / step forward** buttons to navigate between comment markers
+- Views the bar charts on the **Statistics** tab
 
 ## Shared Data Format
 
 Both apps share the same JSON schemas (stored as sibling files next to the video):
 
 - `[videoname].comments.json` — array of timestamped comments
-- `[videoname].summary.json` — five structured feedback fields
+- `[videoname].summary.json` — two bar chart datasets (5-bar and 4-bar)
 
 ## Development
 
