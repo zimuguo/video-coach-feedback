@@ -11,11 +11,21 @@
 
 ## For Windows Users
 
-1. Download the `Setup.exe` file.
-2. Double-click it to install.
-3. Windows may show a blue warning: **"Windows protected your PC"**
+The Windows version is a **portable app** — no installation needed.
+
+1. Download the `.exe` file and save it anywhere (e.g. your Desktop).
+2. Double-click it to launch.
+3. The first time only, Windows will show a blue warning: **"Windows protected your PC"**
    - **Fix:** Click **"More info"** → then click **"Run anyway"**
    - You only need to do this once.
+
+---
+
+## Updating to a New Version
+
+**Mac:** Drag the new `.app` from the new `.dmg` into Applications — it overwrites the old version automatically. No uninstall needed.
+
+**Windows:** Delete the old `.exe` and replace it with the new one. No uninstall needed.
 
 ---
 
