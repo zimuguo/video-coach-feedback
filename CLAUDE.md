@@ -72,6 +72,20 @@ This derivation happens in the main process (`file:getJsonPaths` IPC handler). T
 
 In the coach app, `updateBarItem(chart, index, field, value)` in the store updates individual bars; the summary is auto-saved on each input blur.
 
+### Version and commit hash embedding
+
+Both `electron.vite.config.ts` files inject two constants at build time via Vite `define`:
+- `__APP_VERSION__` — from `package.json` version field
+- `__GIT_COMMIT__` — short SHA from `git rev-parse --short HEAD`
+
+Both constants must be declared at the top of any renderer file that uses them:
+```typescript
+declare const __APP_VERSION__: string
+declare const __GIT_COMMIT__: string
+```
+
+The coach store embeds both in `getCommentsFile()` and `getSummaryFile()` so every exported package carries the version it was created with. The teacher app reads these fields on load and shows a warning banner if either value doesn't match its own build — but still loads the package. The version badge `v{__APP_VERSION__} ({__GIT_COMMIT__})` is rendered at the bottom-right of both apps.
+
 ### Coach vs. Teacher differences
 
 The apps share the same overall structure but differ in:
