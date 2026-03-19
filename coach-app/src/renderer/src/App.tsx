@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 
 declare const __APP_VERSION__: string
 import { useAppStore } from './store/useAppStore'
+import { CommentsFile, SummaryFile, EMPTY_SUMMARY } from './types'
 import VideoPlayer from './components/VideoPlayer'
 import CommentPanel from './components/CommentPanel'
 import SummaryTable from './components/SummaryTable'
@@ -31,8 +32,39 @@ export default function App() {
       const paths = await window.electronAPI.getJsonPaths(filePath)
       const filename = filePath.split(/[\\/]/).pop() || filePath
 
-      loadVideo(filePath, url, filename, paths.commentsPath, paths.summaryPath)
-      setStatusMessage('Video loaded. Watch and pause to add comments.')
+      // Restore any previously saved work for this video
+      const [commentsResult, summaryResult] = await Promise.all([
+        window.electronAPI.readJson(paths.commentsPath),
+        window.electronAPI.readJson(paths.summaryPath)
+      ])
+
+      let existingComments: CommentsFile['comments'] | undefined
+      let existingSummary: typeof EMPTY_SUMMARY | undefined
+      let existingCoachName: string | undefined
+      let existingTeacherName: string | undefined
+      let restored = false
+
+      if (commentsResult.success && commentsResult.data) {
+        const data = commentsResult.data as CommentsFile
+        existingComments = data.comments ?? []
+        existingCoachName = data.coachName || undefined
+        existingTeacherName = data.teacherName || undefined
+        if (existingComments.length > 0) restored = true
+      }
+
+      if (summaryResult.success && summaryResult.data) {
+        const data = summaryResult.data as SummaryFile
+        existingSummary = { ...EMPTY_SUMMARY, ...data.summary }
+      }
+
+      loadVideo(filePath, url, filename, paths.commentsPath, paths.summaryPath,
+        existingComments, existingSummary, existingCoachName, existingTeacherName)
+
+      setStatusMessage(
+        restored
+          ? `Video loaded. Restored ${existingComments!.length} comment${existingComments!.length !== 1 ? 's' : ''} from previous session.`
+          : 'Video loaded. Watch and pause to add comments.'
+      )
     } catch (_err) {
       setStatusMessage('Could not load the video. Please try again.')
     } finally {

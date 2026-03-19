@@ -15,12 +15,14 @@ function BarChart({ title, bars }: BarChartProps) {
   return (
     <div className="flex flex-col gap-2">
       <h3 className="text-xs font-semibold text-slate-300">{title}</h3>
+
+      {/* Bars */}
       <div className="flex gap-1.5">
         {bars.map((bar, i) => {
           const barH = Math.round((bar.count / maxCount) * BAR_AREA_H)
           return (
             <div key={i} className="flex-1 flex flex-col items-center gap-1">
-              {/* Count on top of bar */}
+              {/* Count on top */}
               <span className="text-xs text-slate-300 leading-none">{bar.count}</span>
               {/* Bar area */}
               <div className="w-full flex flex-col justify-end" style={{ height: `${BAR_AREA_H}px` }}>
@@ -29,15 +31,27 @@ function BarChart({ title, bars }: BarChartProps) {
                   style={{ height: `${barH}px` }}
                 />
               </div>
-              {/* Label */}
-              <span className="text-xs text-slate-400 text-center break-words leading-tight">
-                {bar.label || '—'}
-              </span>
+              {/* Index number */}
+              <span className="text-xs text-slate-500 font-mono">{i + 1}</span>
             </div>
           )
         })}
       </div>
-      <div className="border-b border-slate-700" />
+
+      {/* Baseline */}
+      <div className="border-b border-slate-600" />
+
+      {/* Numbered legend — full label per row */}
+      <div className="flex flex-col gap-1.5">
+        {bars.map((bar, i) => (
+          <div key={i} className="flex items-start gap-2">
+            <span className="text-xs text-slate-500 font-mono shrink-0 w-4 pt-0.5">{i + 1}.</span>
+            <span className="text-xs text-slate-300 leading-snug">
+              {bar.label || <span className="text-slate-600 italic">—</span>}
+            </span>
+          </div>
+        ))}
+      </div>
     </div>
   )
 }

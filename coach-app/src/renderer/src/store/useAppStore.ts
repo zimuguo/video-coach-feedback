@@ -41,7 +41,11 @@ interface AppState {
     url: string,
     filename: string,
     commentsPath: string,
-    summaryPath: string
+    summaryPath: string,
+    existingComments?: Comment[],
+    existingSummary?: SummaryData,
+    existingCoachName?: string,
+    existingTeacherName?: string
   ) => void
   setCurrentTime: (time: number) => void
   setVideoDuration: (duration: number) => void
@@ -86,21 +90,23 @@ export const useAppStore = create<AppState>((set, get) => ({
   pendingCommentTimestamp: null,
   statusMessage: null,
 
-  loadVideo: (path, url, filename, commentsPath, summaryPath) =>
-    set({
+  loadVideo: (path, url, filename, commentsPath, summaryPath, existingComments, existingSummary, existingCoachName, existingTeacherName) =>
+    set((state) => ({
       videoPath: path,
       videoUrl: url,
       videoFilename: filename,
       commentsPath,
       summaryPath,
-      comments: [],
-      summary: { ...EMPTY_SUMMARY },
+      comments: existingComments ?? [],
+      summary: existingSummary ?? { ...EMPTY_SUMMARY },
+      coachName: existingCoachName ?? state.coachName,
+      teacherName: existingTeacherName ?? state.teacherName,
       selectedCommentId: null,
       editingCommentId: null,
       showCommentForm: false,
       currentTime: 0,
       videoDuration: 0
-    }),
+    })),
 
   setCurrentTime: (time) => set({ currentTime: time }),
   setVideoDuration: (duration) => set({ videoDuration: duration }),
