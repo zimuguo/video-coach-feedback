@@ -14,6 +14,8 @@ export interface BarItem {
 export interface SummaryData {
   barChart1: BarItem[]
   barChart2: BarItem[]
+  barChart1Comment: string
+  barChart2Comment: string
 }
 
 export interface CommentsFile {
@@ -42,9 +44,11 @@ export const EMPTY_SUMMARY: SummaryData = {
   barChart1: Array(5)
     .fill(null)
     .map(() => ({ label: '', count: 0 })),
-  barChart2: Array(4)
+  barChart2: Array(5)
     .fill(null)
-    .map(() => ({ label: '', count: 0 }))
+    .map(() => ({ label: '', count: 0 })),
+  barChart1Comment: '',
+  barChart2Comment: ''
 }
 
 declare global {

@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "electron-vite dev",
     "build": "electron-vite build",
-    "package": "npm run build && electron-builder"
+    "package": "npm run build && electron-builder && node scripts/rename-apps.js"
   },
   "dependencies": {
     "archiver": "^7.0.1",

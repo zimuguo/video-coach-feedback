@@ -18,9 +18,27 @@ cd teacher-app && npm run build
 # Build distributable installers → dist-installers/
 cd coach-app && npm run package
 cd teacher-app && npm run package
+
+# Build Windows portable exe only (cross-compile from macOS)
+cd coach-app && npm run build && npx electron-builder --win
+cd teacher-app && npm run build && npx electron-builder --win
 ```
 
 There is no shared root `package.json`, no test runner, and no lint config. Each app has its own `node_modules`.
+
+### Distribution artifact naming
+
+`npm run package` produces the following in `dist-installers/`:
+
+| File | Platform |
+|---|---|
+| `Video Coaching Feedback - {App}-{version}.dmg` | Mac Intel (DMG installer) |
+| `Video Coaching Feedback - {App}-{version}-arm64.dmg` | Mac Apple Silicon (DMG installer) |
+| `Video Coaching Feedback - {App}-{version}.exe` | Windows (portable, no install) |
+| `mac/Video Coaching Feedback - {App}-{version}.app` | Mac Intel (unpacked app bundle) |
+| `mac-arm64/Video Coaching Feedback - {App}-{version}-arm64.app` | Mac Apple Silicon (unpacked app bundle) |
+
+The `.app` renaming is handled by `scripts/rename-apps.js`, which runs automatically at the end of `npm run package`. The version is read from `package.json`, so it stays in sync when bumping versions.
 
 ## Architecture
 
@@ -68,9 +86,17 @@ This derivation happens in the main process (`file:getJsonPaths` IPC handler). T
 
 ### Statistics / bar chart data
 
-`SummaryData` holds two bar chart datasets: `barChart1` (5 bars) and `barChart2` (4 bars). Each bar is a `BarItem { label: string; count: number }`. Both apps have their own copy of `src/renderer/src/types/index.ts` with identical content — changes must be applied to both. `EMPTY_SUMMARY` initialises both arrays with blank labels and zero counts.
+`SummaryData` holds two bar chart datasets and two comment strings:
+- `barChart1: BarItem[]` — 5 bars, fixed labels: **C, R, O, W, D**
+- `barChart2: BarItem[]` — 5 bars, fixed labels: **EVA, EXP, ALT, RP, NF**
+- `barChart1Comment: string` — free-text comment displayed below Chart 1
+- `barChart2Comment: string` — free-text comment displayed below Chart 2
 
-In the coach app, `updateBarItem(chart, index, field, value)` in the store updates individual bars; the summary is auto-saved on each input blur.
+Each bar is a `BarItem { label: string; count: number }`. Both apps have their own copy of `src/renderer/src/types/index.ts` with identical content — changes must be applied to both. `EMPTY_SUMMARY` initialises both bar arrays with blank labels and zero counts, and both comment strings as `''`.
+
+Bar labels are fixed constants defined in `SummaryTable.tsx` (`CHART1_LABELS`, `CHART2_LABELS`) — they are **not** editable and not meaningful in saved JSON. Labels are rendered inline below each bar (single row, no numbered legend). The layout sequence in the Statistics tab is: bar chart → comment box → bar chart → comment box.
+
+In the coach app, `updateBarItem(chart, index, field, value)` updates individual bar counts, and `updateChartComment(chart, value)` updates the comment strings; the summary is auto-saved on each input blur.
 
 ### Version and commit hash embedding
 

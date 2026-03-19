@@ -69,6 +69,7 @@ interface AppState {
     field: 'label' | 'count',
     value: string | number
   ) => void
+  updateChartComment: (chart: 'barChart1Comment' | 'barChart2Comment', value: string) => void
   setStatusMessage: (msg: string | null) => void
 
   getCommentsFile: () => object
@@ -169,11 +170,14 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   updateBarItem: (chart, index, field, value) =>
     set((state) => {
-      const bars = state.summary[chart].map((bar, i) =>
+      const bars = (state.summary[chart] as { label: string; count: number }[]).map((bar, i) =>
         i === index ? { ...bar, [field]: value } : bar
       )
       return { summary: { ...state.summary, [chart]: bars } }
     }),
+
+  updateChartComment: (chart, value) =>
+    set((state) => ({ summary: { ...state.summary, [chart]: value } })),
 
   setStatusMessage: (msg) => set({ statusMessage: msg }),
 
