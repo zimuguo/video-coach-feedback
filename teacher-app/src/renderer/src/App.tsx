@@ -1,6 +1,8 @@
 import React, { useState } from 'react'
 
 declare const __APP_VERSION__: string
+
+declare const __APP_VERSION__: string
 import { useAppStore } from './store/useAppStore'
 import VideoPlayer from './components/VideoPlayer'
 import CommentPanel from './components/CommentPanel'
@@ -32,11 +34,14 @@ export default function App() {
       let resolvedTeacherName = ''
       const warnings: string[] = []
 
+      let packageAppVersion: string | undefined
+
       if (commentsResult.success && commentsResult.data) {
         const data = commentsResult.data as CommentsFile
         comments = data.comments || []
         resolvedCoachName = data.coachName || ''
         resolvedTeacherName = data.teacherName || ''
+        packageAppVersion = data.appVersion
       } else {
         warnings.push(
           'Comment file not found — make sure the video and the .comments.json file are in the same folder.'
@@ -49,9 +54,16 @@ export default function App() {
         // Prefer coachName/teacherName from summary if not already set
         if (!resolvedCoachName) resolvedCoachName = data.coachName || ''
         if (!resolvedTeacherName) resolvedTeacherName = data.teacherName || ''
+        if (!packageAppVersion) packageAppVersion = data.appVersion
       } else {
         warnings.push(
           'Summary file not found — make sure the video and the .summary.json file are in the same folder.'
+        )
+      }
+
+      if (packageAppVersion && packageAppVersion !== __APP_VERSION__) {
+        warnings.push(
+          `Version mismatch: this package was created with coach app v${packageAppVersion}, but you are running teacher app v${__APP_VERSION__}. The feedback has been loaded, but some features may look different.`
         )
       }
 

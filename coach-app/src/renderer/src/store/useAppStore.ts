@@ -2,6 +2,8 @@ import { create } from 'zustand'
 import { Comment, SummaryData, EMPTY_SUMMARY } from '../types'
 import { v4 as uuidv4 } from 'uuid'
 
+declare const __APP_VERSION__: string
+
 function formatTime(seconds: number): string {
   const m = Math.floor(seconds / 60)
   const s = Math.floor(seconds % 60)
@@ -178,6 +180,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     const state = get()
     return {
       version: '1.0',
+      appVersion: __APP_VERSION__,
       videoFilename: state.videoFilename,
       createdAt: new Date().toISOString(),
       coachName: state.coachName,
@@ -190,6 +193,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     const state = get()
     return {
       version: '1.0',
+      appVersion: __APP_VERSION__,
       videoFilename: state.videoFilename,
       createdAt: new Date().toISOString(),
       coachName: state.coachName,
