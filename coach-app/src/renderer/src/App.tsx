@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 
 declare const __APP_VERSION__: string
+declare const __GIT_COMMIT__: string
 import { useAppStore } from './store/useAppStore'
 import { CommentsFile, SummaryFile, EMPTY_SUMMARY } from './types'
 import VideoPlayer from './components/VideoPlayer'
@@ -182,7 +183,7 @@ export default function App() {
         </div>
       )}
       <div className="absolute bottom-2 right-3 text-xs text-slate-600 pointer-events-none select-none">
-        v{__APP_VERSION__}
+        v{__APP_VERSION__} ({__GIT_COMMIT__})
       </div>
     </div>
   )

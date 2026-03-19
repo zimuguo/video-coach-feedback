@@ -3,6 +3,7 @@ import { Comment, SummaryData, EMPTY_SUMMARY } from '../types'
 import { v4 as uuidv4 } from 'uuid'
 
 declare const __APP_VERSION__: string
+declare const __GIT_COMMIT__: string
 
 function formatTime(seconds: number): string {
   const m = Math.floor(seconds / 60)
@@ -181,6 +182,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     return {
       version: '1.0',
       appVersion: __APP_VERSION__,
+      appCommit: __GIT_COMMIT__,
       videoFilename: state.videoFilename,
       createdAt: new Date().toISOString(),
       coachName: state.coachName,
@@ -194,6 +196,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     return {
       version: '1.0',
       appVersion: __APP_VERSION__,
+      appCommit: __GIT_COMMIT__,
       videoFilename: state.videoFilename,
       createdAt: new Date().toISOString(),
       coachName: state.coachName,

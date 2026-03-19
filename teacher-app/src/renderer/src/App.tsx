@@ -1,8 +1,7 @@
 import React, { useState } from 'react'
 
 declare const __APP_VERSION__: string
-
-declare const __APP_VERSION__: string
+declare const __GIT_COMMIT__: string
 import { useAppStore } from './store/useAppStore'
 import VideoPlayer from './components/VideoPlayer'
 import CommentPanel from './components/CommentPanel'
@@ -35,6 +34,7 @@ export default function App() {
       const warnings: string[] = []
 
       let packageAppVersion: string | undefined
+      let packageAppCommit: string | undefined
 
       if (commentsResult.success && commentsResult.data) {
         const data = commentsResult.data as CommentsFile
@@ -42,6 +42,7 @@ export default function App() {
         resolvedCoachName = data.coachName || ''
         resolvedTeacherName = data.teacherName || ''
         packageAppVersion = data.appVersion
+        packageAppCommit = data.appCommit
       } else {
         warnings.push(
           'Comment file not found — make sure the video and the .comments.json file are in the same folder.'
@@ -55,15 +56,20 @@ export default function App() {
         if (!resolvedCoachName) resolvedCoachName = data.coachName || ''
         if (!resolvedTeacherName) resolvedTeacherName = data.teacherName || ''
         if (!packageAppVersion) packageAppVersion = data.appVersion
+        if (!packageAppCommit) packageAppCommit = data.appCommit
       } else {
         warnings.push(
           'Summary file not found — make sure the video and the .summary.json file are in the same folder.'
         )
       }
 
-      if (packageAppVersion && packageAppVersion !== __APP_VERSION__) {
+      const versionMismatch = packageAppVersion && packageAppVersion !== __APP_VERSION__
+      const commitMismatch = packageAppCommit && packageAppCommit !== __GIT_COMMIT__
+      if (versionMismatch || commitMismatch) {
         warnings.push(
-          `Version mismatch: this package was created with coach app v${packageAppVersion}, but you are running teacher app v${__APP_VERSION__}. The feedback has been loaded, but some features may look different.`
+          `Compatibility warning: this package was created with coach app v${packageAppVersion ?? '?'} (${packageAppCommit ?? '?'}), ` +
+          `but you are running teacher app v${__APP_VERSION__} (${__GIT_COMMIT__}). ` +
+          `The feedback has been loaded, but some features may look different.`
         )
       }
 
@@ -190,7 +196,7 @@ export default function App() {
         </div>
       )}
       <div className="absolute bottom-2 right-3 text-xs text-slate-600 pointer-events-none select-none">
-        v{__APP_VERSION__}
+        v{__APP_VERSION__} ({__GIT_COMMIT__})
       </div>
     </div>
   )

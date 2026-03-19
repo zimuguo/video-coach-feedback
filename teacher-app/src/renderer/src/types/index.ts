@@ -19,6 +19,7 @@ export interface SummaryData {
 export interface CommentsFile {
   version: string
   appVersion?: string
+  appCommit?: string
   videoFilename: string
   createdAt: string
   coachName: string
@@ -29,6 +30,7 @@ export interface CommentsFile {
 export interface SummaryFile {
   version: string
   appVersion?: string
+  appCommit?: string
   videoFilename: string
   createdAt: string
   coachName: string
