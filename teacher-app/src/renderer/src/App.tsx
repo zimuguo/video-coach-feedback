@@ -1,4 +1,6 @@
 import React, { useState } from 'react'
+
+declare const __APP_VERSION__: string
 import { useAppStore } from './store/useAppStore'
 import VideoPlayer from './components/VideoPlayer'
 import CommentPanel from './components/CommentPanel'
@@ -66,7 +68,7 @@ export default function App() {
   }
 
   return (
-    <div className="flex flex-col h-screen bg-slate-900 text-slate-100">
+    <div className="flex flex-col h-screen bg-slate-900 text-slate-100 relative">
       {/* Header */}
       <header className="flex items-center justify-between px-4 py-2 bg-slate-800 border-b border-slate-700 shrink-0">
         <div className="flex items-center gap-3">
@@ -165,7 +167,7 @@ export default function App() {
                     : 'text-slate-400 hover:text-slate-200'
                 }`}
               >
-                Summary Table
+                Statistics
               </button>
             </div>
 
@@ -175,6 +177,9 @@ export default function App() {
           </div>
         </div>
       )}
+      <div className="absolute bottom-2 right-3 text-xs text-slate-600 pointer-events-none select-none">
+        v{__APP_VERSION__}
+      </div>
     </div>
   )
 }

@@ -56,7 +56,12 @@ interface AppState {
   selectComment: (id: string | null) => void
   setEditingComment: (id: string | null) => void
 
-  updateSummary: (field: keyof SummaryData, value: string) => void
+  updateBarItem: (
+    chart: keyof SummaryData,
+    index: number,
+    field: 'label' | 'count',
+    value: string | number
+  ) => void
   setStatusMessage: (msg: string | null) => void
 
   getCommentsFile: () => object
@@ -153,10 +158,13 @@ export const useAppStore = create<AppState>((set, get) => ({
   selectComment: (id) => set({ selectedCommentId: id }),
   setEditingComment: (id) => set({ editingCommentId: id }),
 
-  updateSummary: (field, value) =>
-    set((state) => ({
-      summary: { ...state.summary, [field]: value }
-    })),
+  updateBarItem: (chart, index, field, value) =>
+    set((state) => {
+      const bars = state.summary[chart].map((bar, i) =>
+        i === index ? { ...bar, [field]: value } : bar
+      )
+      return { summary: { ...state.summary, [chart]: bars } }
+    }),
 
   setStatusMessage: (msg) => set({ statusMessage: msg }),
 

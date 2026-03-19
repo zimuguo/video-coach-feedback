@@ -1,53 +1,114 @@
 import React from 'react'
 import { useAppStore } from '../store/useAppStore'
-import { SUMMARY_LABELS, SummaryData } from '../types'
+import { BarItem, SummaryData } from '../types'
+
+const BAR_AREA_H = 120 // px, fixed height of the bar area
+
+interface BarChartProps {
+  title: string
+  bars: BarItem[]
+  mode: 'edit' | 'view'
+  onUpdate?: (index: number, field: 'label' | 'count', value: string | number) => void
+  onBlur?: () => void
+}
+
+function BarChart({ title, bars, mode, onUpdate, onBlur }: BarChartProps) {
+  const maxCount = Math.max(...bars.map((b) => b.count), 1)
+
+  return (
+    <div className="flex flex-col gap-2">
+      <h3 className="text-xs font-semibold text-slate-300">{title}</h3>
+      <div className="flex gap-1.5">
+        {bars.map((bar, i) => {
+          const barH = Math.round((bar.count / maxCount) * BAR_AREA_H)
+          return (
+            <div key={i} className="flex-1 flex flex-col items-center gap-1">
+              {/* Count: editable input in edit mode, plain text in view mode */}
+              {mode === 'edit' ? (
+                <input
+                  type="number"
+                  min={0}
+                  value={bar.count || ''}
+                  onChange={(e) =>
+                    onUpdate?.(i, 'count', Math.max(0, parseInt(e.target.value) || 0))
+                  }
+                  onBlur={onBlur}
+                  placeholder="0"
+                  className="w-full text-center text-xs bg-slate-700 border border-slate-600 rounded px-1 py-0.5 text-slate-100 focus:outline-none focus:border-blue-500"
+                />
+              ) : (
+                <span className="text-xs text-slate-300 leading-none">{bar.count}</span>
+              )}
+              {/* Bar area */}
+              <div className="w-full flex flex-col justify-end" style={{ height: `${BAR_AREA_H}px` }}>
+                <div
+                  className="w-full bg-blue-500 rounded-t transition-all duration-150"
+                  style={{ height: `${barH}px` }}
+                />
+              </div>
+              {/* Label */}
+              {mode === 'edit' ? (
+                <input
+                  type="text"
+                  value={bar.label}
+                  onChange={(e) => onUpdate?.(i, 'label', e.target.value)}
+                  onBlur={onBlur}
+                  placeholder={`Label ${i + 1}`}
+                  className="w-full text-center text-xs bg-slate-700 border border-slate-600 rounded px-1 py-0.5 text-slate-100 focus:outline-none focus:border-blue-500"
+                />
+              ) : (
+                <span className="text-xs text-slate-400 text-center break-words leading-tight">
+                  {bar.label || '—'}
+                </span>
+              )}
+            </div>
+          )
+        })}
+      </div>
+      <div className="border-b border-slate-700" />
+    </div>
+  )
+}
 
 interface Props {
   mode: 'edit' | 'view'
 }
 
 export default function SummaryTable({ mode }: Props) {
-  const { summary, updateSummary, summaryPath, getSummaryFile } = useAppStore()
+  const { summary, updateBarItem, summaryPath, getSummaryFile } = useAppStore()
 
-  const handleBlur = async (_field: keyof SummaryData) => {
+  const handleBlur = async () => {
     if (summaryPath) {
       const data = getSummaryFile()
       await window.electronAPI.saveSummary(summaryPath, data)
     }
   }
 
-  const fields = Object.keys(SUMMARY_LABELS) as (keyof SummaryData)[]
+  const makeUpdater = (chart: keyof SummaryData) =>
+    (index: number, field: 'label' | 'count', value: string | number) =>
+      updateBarItem(chart, index, field, value)
 
   return (
-    <div className="flex flex-col h-full overflow-y-auto p-3 gap-4">
+    <div className="flex flex-col h-full overflow-y-auto p-3 gap-6">
       {mode === 'edit' && (
         <p className="text-xs text-slate-400">
-          Fill in your feedback below. Changes are saved automatically.
+          Enter label names and counts for each bar. Changes are saved automatically.
         </p>
       )}
-      {fields.map((field) => (
-        <div key={field}>
-          <label className="block text-xs font-semibold text-slate-300 mb-1 leading-tight">
-            {SUMMARY_LABELS[field]}
-          </label>
-          {mode === 'edit' ? (
-            <textarea
-              value={summary[field]}
-              onChange={(e) => updateSummary(field, e.target.value)}
-              onBlur={() => handleBlur(field)}
-              placeholder="Enter your feedback here..."
-              className="w-full bg-slate-800 border border-slate-600 rounded p-2 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-blue-500 resize-none"
-              rows={3}
-            />
-          ) : (
-            <div className="bg-slate-800 rounded p-2 text-sm text-slate-300 min-h-[4rem] whitespace-pre-wrap">
-              {summary[field] || (
-                <span className="text-slate-600 italic">No feedback entered</span>
-              )}
-            </div>
-          )}
-        </div>
-      ))}
+      <BarChart
+        title="Chart 1"
+        bars={summary.barChart1}
+        mode={mode}
+        onUpdate={makeUpdater('barChart1')}
+        onBlur={handleBlur}
+      />
+      <BarChart
+        title="Chart 2"
+        bars={summary.barChart2}
+        mode={mode}
+        onUpdate={makeUpdater('barChart2')}
+        onBlur={handleBlur}
+      />
     </div>
   )
 }

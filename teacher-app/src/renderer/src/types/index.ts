@@ -6,12 +6,14 @@ export interface Comment {
   createdAt: string
 }
 
+export interface BarItem {
+  label: string
+  count: number
+}
+
 export interface SummaryData {
-  crowdWellDone: string
-  crowdToTry: string
-  peerFeedbackWellDone: string
-  attentionSecuring: string
-  otherFeedback: string
+  barChart1: BarItem[]
+  barChart2: BarItem[]
 }
 
 export interface CommentsFile {
@@ -32,20 +34,13 @@ export interface SummaryFile {
   summary: SummaryData
 }
 
-export const SUMMARY_LABELS: Record<keyof SummaryData, string> = {
-  crowdWellDone: 'Well-done with Implementing C-R-O-W-D Prompts',
-  crowdToTry: 'More C-R-O-W-D Prompts to Try',
-  peerFeedbackWellDone: 'Well-done with Implementing P-E-E-R Feedback Strategies',
-  attentionSecuring: 'Performance Feedback on Using Attention Securing Prompts (As Needed)',
-  otherFeedback: 'Other Feedback'
-}
-
 export const EMPTY_SUMMARY: SummaryData = {
-  crowdWellDone: '',
-  crowdToTry: '',
-  peerFeedbackWellDone: '',
-  attentionSecuring: '',
-  otherFeedback: ''
+  barChart1: Array(5)
+    .fill(null)
+    .map(() => ({ label: '', count: 0 })),
+  barChart2: Array(4)
+    .fill(null)
+    .map(() => ({ label: '', count: 0 }))
 }
 
 declare global {
