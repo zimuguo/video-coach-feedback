@@ -62,3 +62,19 @@ https://github.com/{owner}/{repo}/releases/tag/v1.0.2
 ```
 
 Users read the distribution guide on the page and download the right file for their platform. No GitHub account required for public repos.
+
+---
+
+## Updating the release description without rebuilding
+
+To update only the `DISTRIBUTION.md` content on an existing release page (no new build or tag needed):
+
+1. Edit `DISTRIBUTION.md` locally
+2. Commit and push the change to `main`
+3. Run:
+
+```bash
+gh release edit v1.0.2 --repo zimuguo/video-coach-feedback --notes-file DISTRIBUTION.md
+```
+
+Replace `v1.0.2` with the tag of the release you want to update.
