@@ -40,6 +40,8 @@ There is no shared root `package.json`, no test runner, and no lint config. Each
 
 The `.app` renaming is handled by `scripts/rename-apps.js`, which runs automatically at the end of `npm run package`. The version is read from `package.json`, so it stays in sync when bumping versions.
 
+In the GitHub Actions release flow, `.app` bundles are additionally zipped (`.app.zip`) since they are directories and cannot be attached to a release directly as-is.
+
 ## Architecture
 
 ### Three-process Electron model
@@ -118,5 +120,16 @@ The apps share the same overall structure but differ in:
 - **Coach** has `ipc-handlers.ts` (write operations, ZIP export via `archiver`), `CommentPanel` with edit/delete/add form, `ExportButton`, and editable bar chart inputs in the Statistics tab
 - **Teacher** has all IPC inline in `main/index.ts` (read-only), `CommentPanel` that seeks on click, and read-only bar chart display in the Statistics tab
 - Both apps have amber timestamp marker pips on the seek bar and **step back / step forward** buttons flanking the play button to jump between comment markers
-- Teacher's `VideoPlayer` manages a `seekToTime` value in the store — when set, the video element seeks then clears it; this decouples the comment list's seek trigger from the video element ref
+- Both apps use the `seekToTime` / `triggerSeek` / `clearSeek` store pattern — clicking a comment in either app's `CommentPanel` calls `triggerSeek(timestamp)`, and `VideoPlayer` watches `seekToTime` via a `useEffect` to seek then clear it
+- Seek bar marker tooltips show **timestamp only** (no comment text preview) in both apps
 - Color scheme: coach = blue, teacher = emerald/green
+
+### Release flow
+
+Releases are fully automated via `.github/workflows/build.yml`. Pushing a `v*` tag triggers the workflow:
+1. Reads the version from the tag (e.g. `v1.0.2` → `1.0.2`) and writes it into both apps' `package.json` via `npm version` before building — no manual version bump needed
+2. Builds Mac DMG + unpacked `.app` (both x64 and arm64) and Windows portable exe for each app, on a `macos-latest` runner
+3. Zips the `.app` bundles (since they are directories)
+4. Creates a GitHub Release with all 10 artifacts attached and `DISTRIBUTION.md` as the release body
+
+See `RELEASING.md` for the full step-by-step release process and how to update the release description without rebuilding.
