@@ -20,7 +20,9 @@ export default function CommentPanel() {
     deleteComment,
     closeCommentForm,
     setEditingComment,
-    setStatusMessage
+    setStatusMessage,
+    selectComment,
+    triggerSeek
   } = useAppStore()
 
   const [commentText, setCommentText] = useState('')
@@ -126,7 +128,14 @@ export default function CommentPanel() {
         ) : (
           <div className="divide-y divide-slate-800">
             {comments.map((comment) => (
-              <div key={comment.id} className="p-3 hover:bg-slate-800/50 transition-colors">
+              <div
+                key={comment.id}
+                className="p-3 hover:bg-slate-800/50 transition-colors cursor-pointer"
+                onClick={() => {
+                  selectComment(comment.id)
+                  triggerSeek(comment.timestamp)
+                }}
+              >
                 <div className="flex items-start justify-between gap-2">
                   <span className="text-xs font-mono bg-blue-900 text-blue-300 px-2 py-0.5 rounded shrink-0">
                     {comment.timestampDisplay}

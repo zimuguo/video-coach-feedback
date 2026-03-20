@@ -1,4 +1,4 @@
-name: Build Installers
+name: Build & Release
 
 on:
   push:
@@ -6,49 +6,90 @@ on:
       - 'v*'
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
-  build-mac:
+  build:
+    name: Build ${{ matrix.app_label }}
+    strategy:
+      matrix:
+        include:
+          - app: coach-app
+            app_label: Coach
+          - app: teacher-app
+            app_label: Teacher
     runs-on: macos-latest
+
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: 20
 
-      - name: Build Coach App (Mac)
-        working-directory: coach-app
-        run: npm install && npm run build && npx electron-builder --mac dmg
+      - name: Bump version from tag
+        working-directory: ${{ matrix.app }}
+        run: |
+          VERSION=${GITHUB_REF_NAME#v}
+          npm version "$VERSION" --no-git-tag-version
 
-      - name: Build Teacher App (Mac)
-        working-directory: teacher-app
-        run: npm install && npm run build && npx electron-builder --mac dmg
+      - name: Install dependencies
+        working-directory: ${{ matrix.app }}
+        run: npm install
 
-      - uses: actions/upload-artifact@v4
+      - name: Build (Vite)
+        working-directory: ${{ matrix.app }}
+        run: npm run build
+
+      - name: Package Mac (DMG + .app)
+        working-directory: ${{ matrix.app }}
+        run: npx electron-builder
+
+      - name: Package Windows (portable exe)
+        working-directory: ${{ matrix.app }}
+        run: npx electron-builder --win
+
+      - name: Rename .app bundles
+        working-directory: ${{ matrix.app }}
+        run: node scripts/rename-apps.js
+
+      - name: Zip .app bundles
+        working-directory: ${{ matrix.app }}
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          APP="Video Coaching Feedback - ${{ matrix.app_label }}"
+          cd dist-installers/mac
+          zip -r "../${APP}-${VERSION}.app.zip" "${APP}-${VERSION}.app"
+          cd ../mac-arm64
+          zip -r "../${APP}-${VERSION}-arm64.app.zip" "${APP}-${VERSION}-arm64.app"
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
         with:
-          name: mac-installers
+          name: ${{ matrix.app }}-dist
           path: |
-            coach-app/dist-installers/*.dmg
-            teacher-app/dist-installers/*.dmg
+            ${{ matrix.app }}/dist-installers/*.dmg
+            ${{ matrix.app }}/dist-installers/*.exe
+            ${{ matrix.app }}/dist-installers/*.zip
 
-  build-windows:
-    runs-on: windows-latest
+  release:
+    name: Create GitHub Release
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
         with:
-          node-version: 20
+          path: dist
+          merge-multiple: true
 
-      - name: Build Coach App (Windows)
-        working-directory: coach-app
-        run: npm install && npm run build && npx electron-builder --win nsis --x64
-
-      - name: Build Teacher App (Windows)
-        working-directory: teacher-app
-        run: npm install && npm run build && npx electron-builder --win nsis --x64
-
-      - uses: actions/upload-artifact@v4
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
         with:
-          name: windows-installers
-          path: |
-            coach-app/dist-installers/*.exe
-            teacher-app/dist-installers/*.exe
+          files: dist/**
+          body_path: DISTRIBUTION.md

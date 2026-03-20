@@ -210,16 +210,8 @@ export default function VideoPlayer() {
                 >
                   {(isHovered || isActive) && (
                     <div className="timestamp-marker-tooltip">
-                      <div className="text-amber-400 text-sm font-mono mb-1">
+                      <div className="text-amber-400 text-sm font-mono">
                         {comment.timestampDisplay}
-                      </div>
-                      <div
-                        className="text-slate-200 text-sm leading-snug"
-                        style={{ maxWidth: '200px', wordBreak: 'break-word' }}
-                      >
-                        {comment.text.length > 40
-                          ? comment.text.slice(0, 40) + '...'
-                          : comment.text}
                       </div>
                     </div>
                   )}

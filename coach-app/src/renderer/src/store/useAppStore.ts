@@ -37,6 +37,7 @@ interface AppState {
   showCommentForm: boolean
   pendingCommentTimestamp: number | null
   statusMessage: string | null
+  seekToTime: number | null
 
   // Actions
   loadVideo: (
@@ -62,6 +63,8 @@ interface AppState {
   deleteComment: (id: string) => void
   selectComment: (id: string | null) => void
   setEditingComment: (id: string | null) => void
+  triggerSeek: (time: number) => void
+  clearSeek: () => void
 
   updateBarItem: (
     chart: keyof SummaryData,
@@ -93,6 +96,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   showCommentForm: false,
   pendingCommentTimestamp: null,
   statusMessage: null,
+  seekToTime: null,
 
   loadVideo: (path, url, filename, commentsPath, summaryPath, existingComments, existingSummary, existingCoachName, existingTeacherName) =>
     set((state) => ({
@@ -167,6 +171,8 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   selectComment: (id) => set({ selectedCommentId: id }),
   setEditingComment: (id) => set({ editingCommentId: id }),
+  triggerSeek: (time) => set({ seekToTime: time }),
+  clearSeek: () => set({ seekToTime: null }),
 
   updateBarItem: (chart, index, field, value) =>
     set((state) => {

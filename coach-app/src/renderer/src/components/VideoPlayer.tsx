@@ -14,7 +14,7 @@ export default function VideoPlayer() {
   const {
     videoUrl, currentTime, videoDuration, comments,
     selectedCommentId, setCurrentTime, setVideoDuration,
-    selectComment, openCommentForm
+    selectComment, openCommentForm, seekToTime, clearSeek
   } = useAppStore()
 
   const isDragging = useRef(false)
@@ -29,6 +29,14 @@ export default function VideoPlayer() {
     video.load()
     setIsPlaying(false)
   }, [videoUrl])
+
+  useEffect(() => {
+    if (seekToTime === null) return
+    const video = videoRef.current
+    if (!video) return
+    video.currentTime = seekToTime
+    clearSeek()
+  }, [seekToTime, clearSeek])
 
   const handleTimeUpdate = useCallback(() => {
     const video = videoRef.current
@@ -176,16 +184,8 @@ export default function VideoPlayer() {
                 >
                   {(isHovered || isActive) && (
                     <div className="timestamp-marker-tooltip">
-                      <div className="text-amber-400 text-sm font-mono mb-1">
+                      <div className="text-amber-400 text-sm font-mono">
                         {comment.timestampDisplay}
-                      </div>
-                      <div
-                        className="text-slate-200 text-sm leading-snug"
-                        style={{ maxWidth: '200px', wordBreak: 'break-word' }}
-                      >
-                        {comment.text.length > 40
-                          ? comment.text.slice(0, 40) + '...'
-                          : comment.text}
                       </div>
                     </div>
                   )}
