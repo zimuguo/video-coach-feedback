@@ -18,10 +18,10 @@
 
 1. Double-click the `.dmg` file to mount it.
 2. Drag "Video Coaching Feedback - Coach" to the Applications folder.
-3. On first launch, macOS may block the app. Go to **System Settings → Privacy & Security**, scroll down, and click **"Open Anyway"**.
+3. On first launch, macOS may block the app with a warning dialog — click **"Done"**. Then go to **System Settings → Privacy & Security**, scroll down, and click **"Open Anyway"** (this option only appears after the first blocked attempt).
 4. Click **"Open"** in the confirmation dialog.
 
-If you see *"[App Name] is damaged and can't be opened"* after the above steps, this is a macOS Gatekeeper quarantine issue. To fix it:
+If you see *"[App Name] is damaged and can't be opened"*, click **"Cancel"** (not "Move to Trash"), then follow the steps below to clear the quarantine flag:
 
 1. Open **Terminal** (search "Terminal" in Spotlight).
 2. Type the following command, then **drag the `.app` from Finder into the Terminal window** to auto-fill its path:
@@ -81,10 +81,10 @@ xattr -cr "/path/to/Video Coaching Feedback - Coach.app"
 
 1. Double-click the `.dmg` file to mount it.
 2. Drag "Video Coaching Feedback - Teacher" to the Applications folder.
-3. On first launch, macOS may block the app. Go to **System Settings → Privacy & Security**, scroll down, and click **"Open Anyway"**.
+3. On first launch, macOS may block the app with a warning dialog — click **"Done"**. Then go to **System Settings → Privacy & Security**, scroll down, and click **"Open Anyway"** (this option only appears after the first blocked attempt).
 4. Click **"Open"** in the confirmation dialog.
 
-If you see *"[App Name] is damaged and can't be opened"* after the above steps, this is a macOS Gatekeeper quarantine issue. To fix it:
+If you see *"[App Name] is damaged and can't be opened"*, click **"Cancel"** (not "Move to Trash"), then follow the steps below to clear the quarantine flag:
 
 1. Open **Terminal** (search "Terminal" in Spotlight).
 2. Type the following command, then **drag the `.app` from Finder into the Terminal window** to auto-fill its path:
